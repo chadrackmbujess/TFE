@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Accueil - Système ITSM{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8">Bienvenue dans le Système ITSM</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Gestion des Utilisateurs</h3>
+            <p class="text-gray-600">Gérez les comptes, rôles et structures de votre organisation.</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Gestion des Machines</h3>
+            <p class="text-gray-600">Suivez et gérez votre parc informatique en temps réel.</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Support Technique</h3>
+            <p class="text-gray-600">Système de tickets pour un support efficace.</p>
+        </div>
+    </div>
+    
+    <div class="mt-12">
+        <a href="{% url 'dashboard' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            Accéder au Tableau de Bord
+        </a>
+    </div>
+</div>
+{% endblock %}

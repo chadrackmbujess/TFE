@@ -1,0 +1,65 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run Django checks
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        python manage.py check --deploy
+        python manage.py collectstatic --noinput --dry-run
+    
+    - name: Deploy to server
+      env:
+        DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        # Placeholder pour script de déploiement
+        echo "Déploiement vers le serveur de production"
+        # Exemple avec rsync ou scp
+        # rsync -avz --delete . $DEPLOY_USER@$DEPLOY_HOST:/path/to/app/
+    
+    - name: Run database migrations
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      run: |
+        # python manage.py migrate --no-input
+        echo "Migrations de base de données"
+    
+    - name: Restart services
+      run: |
+        # Redémarrage des services (nginx, gunicorn, etc.)
+        echo "Redémarrage des services"
+    
+    - name: Health check
+      run: |
+        # Vérification que l'application fonctionne
+        # curl -f http://your-domain.com/health/ || exit 1
+        echo "Vérification de santé de l'application"

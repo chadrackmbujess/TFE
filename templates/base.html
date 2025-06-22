@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Système ITSM{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Système ITSM</h1>
+            <div>
+                {% if user.is_authenticated %}
+                    <span>Bonjour, {{ user.nom_complet }}</span>
+                    <a href="{% url 'admin:logout' %}" class="ml-4 bg-blue-500 px-3 py-1 rounded">Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'admin:login' %}" class="bg-blue-500 px-3 py-1 rounded">Connexion</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 px-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

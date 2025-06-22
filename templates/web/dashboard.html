@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord - Système ITSM{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Tableau de Bord</h1>
+    <p class="text-gray-600 mt-2">Vue d'ensemble de votre système ITSM</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700">Tickets Ouverts</h3>
+        <p class="text-3xl font-bold text-blue-600 mt-2">--</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700">Machines Actives</h3>
+        <p class="text-3xl font-bold text-green-600 mt-2">--</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700">Utilisateurs</h3>
+        <p class="text-3xl font-bold text-purple-600 mt-2">--</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700">Alertes</h3>
+        <p class="text-3xl font-bold text-red-600 mt-2">--</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-4">Tickets Récents</h3>
+        <p class="text-gray-500">Aucun ticket pour le moment</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-4">Activité Système</h3>
+        <p class="text-gray-500">Aucune activité récente</p>
+    </div>
+</div>
+{% endblock %}

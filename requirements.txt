@@ -1,0 +1,37 @@
+# Backend Django
+Django==4.2.7
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.3
+Pillow==10.0.1
+python-decouple==3.8
+cryptography==41.0.7
+PyJWT==2.8.0
+
+# Base de données
+psycopg2-binary==2.9.7
+
+# Monitoring et logging
+django-extensions==3.2.3
+
+# Tests
+pytest==7.4.3
+pytest-django==4.5.2
+
+# Application Desktop Kivy
+kivy==2.2.0
+kivymd==1.1.1
+plyer==2.1.0
+psutil==5.9.6
+
+# Contrôle distant
+paramiko==3.3.1
+vncdotool==1.0.0
+
+# IA et ML
+openai==1.3.5
+scikit-learn==1.3.2
+
+# Utilitaires
+requests==2.31.0
+schedule==1.2.0

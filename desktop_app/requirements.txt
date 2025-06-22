@@ -1,0 +1,16 @@
+# Dépendances pour l'application desktop ITSM
+
+# Interface utilisateur
+kivy==2.2.0
+kivymd==1.1.1
+
+# Accès aux APIs système
+plyer==2.1.0
+psutil==5.9.6
+
+# Communication réseau
+requests==2.31.0
+
+# Utilitaires
+python-dateutil==2.8.2
+pillow==10.0.1

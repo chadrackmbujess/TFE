@@ -1,0 +1,100 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Générer le changelog depuis le dernier tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+        if [ -n "$PREVIOUS_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD)
+        else
+          CHANGELOG=$(git log --pretty=format:"- %s")
+        fi
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          ## 🚀 Nouvelle version ITSM Compagnon ${{ github.ref_name }}
+          
+          ### 📋 Changements
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ### 📱 Applications disponibles
+          - **Application Mobile Android** : Téléchargez l'APK ci-dessous
+          - **Application Desktop** : Disponible pour Windows et Linux
+          - **Backend Django** : Déployé automatiquement
+          
+          ### 🔧 Installation
+          1. Téléchargez l'APK Android depuis les assets
+          2. Installez l'application sur votre appareil
+          3. Configurez l'URL du serveur dans les paramètres
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+
+  build-all-platforms:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: android
+          - os: ubuntu-latest
+            platform: linux-desktop
+          - os: windows-latest
+            platform: windows-desktop
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Build Android APK
+      if: matrix.platform == 'android'
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-8-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        pip install buildozer cython
+        cd mobile_app
+        buildozer android release
+    
+    - name: Build Desktop App
+      if: contains(matrix.platform, 'desktop')
+      run: |
+        pip install kivy kivymd pyinstaller
+        pip install -r requirements.txt
+        cd desktop_app
+        pyinstaller --onefile --windowed --name="ITSM-Desktop-${{ matrix.platform }}" main.py
+    
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        files: |
+          mobile_app/bin/*.apk
+          desktop_app/dist/ITSM-Desktop-*

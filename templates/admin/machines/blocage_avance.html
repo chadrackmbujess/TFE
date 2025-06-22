@@ -1,0 +1,434 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}Blocage Avancé de Logiciels{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.blocage-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.blocage-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.blocage-section h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #417690;
+    padding-bottom: 10px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    align-items: flex-start;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #417690;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2);
+}
+
+.checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 4px;
+}
+
+.checkbox-item:hover {
+    background: #e9e9e9;
+    border-radius: 4px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #417690, #5a9bd4);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.select-all-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.select-all-btn:hover {
+    background: #5a6268;
+}
+
+#logiciels-par-categorie {
+    display: none;
+    margin-top: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="blocage-container">
+    <h1>🚫 Blocage Avancé de Logiciels</h1>
+    <p>Interface pour bloquer ou autoriser des logiciels en masse par utilisateur, structure, site ou groupe.</p>
+    
+    <!-- Statistiques -->
+    <div class="blocage-section">
+        <h3>📊 Statistiques</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total_logiciels }}</span>
+                <span class="stat-label">Logiciels référencés</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.logiciels_interdits }}</span>
+                <span class="stat-label">Logiciels interdits</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.autorisations_refusees }}</span>
+                <span class="stat-label">Autorisations refusées</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.logiciels_bloques }}</span>
+                <span class="stat-label">Logiciels bloqués</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Formulaire de blocage -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Sélection des logiciels -->
+        <div class="blocage-section">
+            <h3>🎯 Sélection des Logiciels</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sélection par catégorie</label>
+                    <select class="form-control" id="categorie-select" onchange="toggleLogicielsParCategorie()">
+                        <option value="">-- Sélectionner une catégorie --</option>
+                        {% for categorie in categories %}
+                            <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <div id="logiciels-par-categorie">
+                        <button type="button" class="select-all-btn" onclick="selectAllCategories()">Tout sélectionner</button>
+                        <div class="checkbox-list" id="categories-list">
+                            {% for categorie in categories %}
+                                <div class="checkbox-item">
+                                    <input type="checkbox" name="categories" value="{{ categorie.id }}" id="cat_{{ categorie.id }}">
+                                    <label for="cat_{{ categorie.id }}">{{ categorie.nom }} ({{ categorie.logicielreference_set.count }} logiciels)</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Sélection individuelle</label>
+                    <button type="button" class="select-all-btn" onclick="selectAllLogiciels()">Tout sélectionner</button>
+                    <div class="checkbox-list">
+                        {% for logiciel in logiciels %}
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="logiciels" value="{{ logiciel.id }}" id="log_{{ logiciel.id }}">
+                                <label for="log_{{ logiciel.id }}">
+                                    {{ logiciel.nom }}
+                                    {% if logiciel.editeur %} - {{ logiciel.editeur }}{% endif %}
+                                    <span style="color: {% if logiciel.niveau_securite == 'interdit' %}red{% elif logiciel.niveau_securite == 'restreint' %}orange{% else %}green{% endif %};">
+                                        ({{ logiciel.get_niveau_securite_display }})
+                                    </span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sélection des cibles -->
+        <div class="blocage-section">
+            <h3>🎯 Sélection des Cibles</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Type de cible</label>
+                    <select class="form-control" name="cible_type" id="cible-type" onchange="toggleCibles()" required>
+                        <option value="">-- Sélectionner le type --</option>
+                        <option value="utilisateur">Utilisateurs</option>
+                        <option value="structure">Structures</option>
+                        <option value="site">Sites</option>
+                        <option value="groupe">Groupes</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="cibles-container" style="display: none;">
+                <button type="button" class="select-all-btn" onclick="selectAllCibles()">Tout sélectionner</button>
+                
+                <div id="utilisateurs-list" class="checkbox-list" style="display: none;">
+                    {% for utilisateur in utilisateurs %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="cibles" value="{{ utilisateur.id }}" id="user_{{ utilisateur.id }}">
+                            <label for="user_{{ utilisateur.id }}">{{ utilisateur.username }} - {{ utilisateur.get_full_name }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div id="structures-list" class="checkbox-list" style="display: none;">
+                    {% for structure in structures %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="cibles" value="{{ structure.id }}" id="struct_{{ structure.id }}">
+                            <label for="struct_{{ structure.id }}">{{ structure.nom }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div id="sites-list" class="checkbox-list" style="display: none;">
+                    {% for site in sites %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="cibles" value="{{ site.id }}" id="site_{{ site.id }}">
+                            <label for="site_{{ site.id }}">{{ site.nom }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div id="groupes-list" class="checkbox-list" style="display: none;">
+                    {% for groupe in groupes %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="cibles" value="{{ groupe.id }}" id="group_{{ groupe.id }}">
+                            <label for="group_{{ groupe.id }}">{{ groupe.nom }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Motif -->
+        <div class="blocage-section">
+            <h3>📝 Motif</h3>
+            <div class="form-group">
+                <label>Motif du blocage/autorisation (optionnel)</label>
+                <textarea class="form-control" name="motif" rows="3" placeholder="Expliquez la raison de cette action..."></textarea>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="action-buttons">
+            <button type="submit" name="action" value="bloquer" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir bloquer ces logiciels ?')">
+                🚫 Bloquer
+            </button>
+            <button type="submit" name="action" value="autoriser" class="btn btn-success" onclick="return confirm('Êtes-vous sûr de vouloir autoriser ces logiciels ?')">
+                ✅ Autoriser
+            </button>
+            <button type="submit" name="action" value="interdire" class="btn btn-warning" onclick="return confirm('Êtes-vous sûr de vouloir marquer ces logiciels comme INTERDITS ?')">
+                ⛔ Interdire (Politique)
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleLogicielsParCategorie() {
+    const categorieSelect = document.getElementById('categorie-select');
+    const logicielsParCategorie = document.getElementById('logiciels-par-categorie');
+    
+    if (categorieSelect.value) {
+        logicielsParCategorie.style.display = 'block';
+    } else {
+        logicielsParCategorie.style.display = 'none';
+    }
+}
+
+function toggleCibles() {
+    const cibleType = document.getElementById('cible-type').value;
+    const ciblesContainer = document.getElementById('cibles-container');
+    
+    // Masquer toutes les listes
+    document.getElementById('utilisateurs-list').style.display = 'none';
+    document.getElementById('structures-list').style.display = 'none';
+    document.getElementById('sites-list').style.display = 'none';
+    document.getElementById('groupes-list').style.display = 'none';
+    
+    if (cibleType) {
+        ciblesContainer.style.display = 'block';
+        document.getElementById(cibleType + 's-list').style.display = 'block';
+    } else {
+        ciblesContainer.style.display = 'none';
+    }
+}
+
+function selectAllCategories() {
+    const checkboxes = document.querySelectorAll('input[name="categories"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+}
+
+function selectAllLogiciels() {
+    const checkboxes = document.querySelectorAll('input[name="logiciels"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+}
+
+function selectAllCibles() {
+    const cibleType = document.getElementById('cible-type').value;
+    if (!cibleType) return;
+    
+    const checkboxes = document.querySelectorAll('input[name="cibles"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+}
+</script>
+{% endblock %}
